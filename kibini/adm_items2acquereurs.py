@@ -13,20 +13,35 @@ c2l.get_val()
 
 query = """
 SELECT
-    av.lib AS "Espace",
-    i.itemcallnumber AS "Cote",
-    i.barcode AS "Code-barre",
-    b.author AS "Auteur",
-    b.title AS "Titre",
+    i.itemnumber,
+    i.barcode,
+    i.dateaccessioned,
+    i.price,
+    i.homebranch,
+    i.holdingbranch,
+    i.location,
+    i.ccode,
+    i.itemcallnumber,
+    i.notforloan,
+    i.damaged,
+    i.withdrawn,
+    i.withdrawn_on,
+    i.itemlost,
+    i.itemlost_on,
+    i.onloan,
+    i.datelastborrowed,
+    i.biblionumber,
+    b.title as titre,
+    b.author,
     ExtractValue(m.metadata, '//datafield[@tag="200"]/subfield[@code="h"]') AS "Volume",
     i.copynumber AS "Volume perios",
-	i.itemlost,
-    DATE(i.timestamp) AS "Date derniere modif"
+    bi.publicationyear,
+    bi.itemtype,
+    DATE(i.timestamp)
 FROM koha_prod.items i
-LEFT JOIN koha_prod.biblio b ON i.biblionumber = b.biblionumber
-LEFT JOIN koha_prod.biblioitems bi ON i.biblionumber = bi.biblionumber
-LEFT JOIN koha_prod.biblio_metadata m ON m.biblionumber = bi.biblionumber
-LEFT JOIN koha_prod.authorised_values av ON av.authorised_value = i.location
+JOIN koha_prod.biblioitems bi ON i.biblionumber = bi.biblionumber
+JOIN koha_prod.biblio b ON i.biblionumber = b.biblionumber
+JOIN koha_prod.biblio_metadata m ON m.biblionumber = bi.biblionumber
 WHERE i.notforloan = 4
 AND i.itemlost != 0
 AND DATE(i.timestamp) >= CURDATE() - INTERVAL 6 MONTH
