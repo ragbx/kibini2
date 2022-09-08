@@ -7,6 +7,8 @@ from kiblib.utils.email_sender import send_email
 from kiblib.document import Document
 
 db_conn = DbConn().create_engine()
+c2l = Code2Libelle(db_conn)
+c2l.get_val()
 
 query = """
 SELECT
