@@ -52,4 +52,5 @@ LIMIT 100
 df = pd.read_sql(query, con=db_conn)
 document = Document(df=df, con=db_conn, c2l=c2l.dict_codes_lib)
 document.get_doc_statdb_data()
+document.get_doc_es_data()
 print(document.df)
