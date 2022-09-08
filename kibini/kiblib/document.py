@@ -75,7 +75,9 @@ class Document():
             'doc_usage_emprunt_date',
             'doc_usage_date_dernier_pret',
             'doc_biblio_id',
+            'doc_biblio_auteur'
             'doc_biblio_titre',
+            'doc_biblio_auteur',
             'doc_biblio_annee_publication',
             'doc_biblio_support_code',
             'doc_item_pilon_annee',
@@ -122,6 +124,7 @@ class Document():
             'doc_biblio_id',
             'doc_biblio_auteur'
             'doc_biblio_titre',
+            'doc_biblio_volume',
             'doc_biblio_annee_publication',
             'doc_biblio_support_code',
             'doc_biblio_support',
@@ -395,7 +398,7 @@ class Document():
             self.df['doc_biblio_titre'] = self.df['doc_biblio_titre'].astype('str').apply(
                 lambda x: unidecode(x))
 
-    def get_doc_biblio_volume():
+    def get_doc_biblio_volume(self):
         if ('volume' in self.df and
                 'doc_biblio_volume' not in self.df):
             self.df['doc_biblio_volume'] = self.df['volume']
