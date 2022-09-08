@@ -4,6 +4,7 @@ from os.path import join
 from kiblib.utils.db import DbConn
 from kiblib.utils.conf import Config
 from kiblib.utils.email_sender import send_email
+from kiblib.utils.code2libelle import Code2Libelle
 from kiblib.document import Document
 
 db_conn = DbConn().create_engine()
