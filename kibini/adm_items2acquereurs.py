@@ -55,8 +55,17 @@ document.get_doc_es_data()
 document.get_doc_list_data()
 df = document.doc_list_data
 
+query = """
+SELECT
+    biblionumber, "oui"
+FROM koha_prod.reserves
+WHERE waitingdate IS NULL
+"""
+resa = pd.read_sql(query, con=db_conn)
+df = df.merge(resa, how='left', left_on='dic_biblio_id', right_on='biblionumber')
+
 r = len(df)
 if r > 0:
     dir_data = Config().get_config_data()
-    file_out = join(dir_data, "sortisCollections.xlsx")
+    file_out = join(dir_data, "sortisCollectionsPerdus.xlsx")
     df.to_excel(file_out, header=True, index=False)
