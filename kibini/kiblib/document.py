@@ -456,6 +456,6 @@ class Document():
                     'doc_biblio_titre',
                     'doc_biblio_volume',
                     'doc_biblio_annee_publication',
-                    'doc_biblio_support'
+                    'doc_biblio_support_code'
                 ]
         self.doc_list_data = self.df[columns_to_keep]
