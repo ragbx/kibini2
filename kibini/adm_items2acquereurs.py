@@ -46,12 +46,17 @@ WHERE i.notforloan = 4
 AND i.itemlost != 0
 AND DATE(i.timestamp) >= CURDATE() - INTERVAL 6 MONTH
 ORDER BY i.location, i.itemcallnumber
-LIMIT 100
 """
 
-df = pd.read_sql(query, con=db_conn)
-document = Document(df=df, con=db_conn, c2l=c2l.dict_codes_lib)
+df0 = pd.read_sql(query, con=db_conn)
+document = Document(df=df0, con=db_conn, c2l=c2l.dict_codes_lib)
 document.get_doc_statdb_data()
 document.get_doc_es_data()
 document.get_doc_list_data()
-print(document.doc_list_data)
+df = document.doc_list_data
+
+r = len(df)
+if r > 0:
+    dir_data = Config().get_config_data()
+    file_out = join(dir_data, "sortisCollections.xlsx")
+    df.to_excel(file_out, header=True, index=False)
