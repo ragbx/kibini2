@@ -185,7 +185,7 @@ class Code2Libelle():
         query = """
             SELECT authorised_value, lib
             FROM koha_prod.authorised_values
-            WHERE category = 'ccode'
+            WHERE category = 'TYPEDOC'
         """
         df = pd.read_sql(query, con=self.db_conn)
         df = df.set_index('authorised_value')
