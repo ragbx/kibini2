@@ -1,0 +1,417 @@
+import pandas as pd
+import numpy as np
+import datetime
+from unidecode import unidecode
+
+from kiblib.utils.db import DbConn
+from kiblib.utils.code2libelle import Code2Libelle
+
+class Document():
+    def __init__(self, **kwargs):
+        if 'db_conn' in kwargs:
+            self.db_conn = kwargs.get('db_conn')
+        else:
+            self.db_conn = DbConn().create_db_con()
+
+        if 'c2l' in kwargs:
+            self.c2l = kwargs.get('c2l')
+        else:
+            c2l = Code2Libelle(self.db_conn)
+            c2l.get_val()
+            self.c2l = c2l.dict_codes_lib
+
+        if 'df' in kwargs:
+            self.df = kwargs.get('df')
+        else:
+            query = """
+                SELECT
+                    i.itemnumber,
+                    i.barcode,
+                    i.dateaccessioned,
+                    i.price,
+                    i.homebranch,
+                    i.holdingbranch,
+                    i.location,
+                    i.ccode,
+                    i.itemcallnumber,
+                    i.notforloan,
+                    i.damaged,
+                    i.withdrawn,
+                    i.withdrawn_on,
+                    i.itemlost,
+                    i.itemlost_on,
+                    i.onloan,
+                    i.datelastborrowed,
+                    i.biblionumber,
+                    b.title as titre,
+                    bi.publicationyear,
+                    bi.itemtype
+                FROM koha2019.items i
+                JOIN koha2019.biblioitems bi ON i.biblionumber = bi.biblionumber
+                JOIN koha2019.biblio b ON i.biblionumber = b.biblionumber
+                LIMIT 10000
+            """
+            self.df = pd.read_sql(query, con=self.db_conn)
+
+        super(Document, self).__init__()
+
+        # en sortie, on doit obtenir les champs suivants pour statdb :
+        self.doc_statdb_columns = [
+            'doc_item_id',
+            'doc_item_code_barre',
+            'doc_item_date_creation',
+            'doc_item_prix',
+            'doc_item_site_detenteur_code',
+            'doc_item_site_rattachement_code',
+            'doc_item_localisation_code',
+            'doc_item_collection_ccode',
+            'doc_item_cote',
+            'doc_statut_code',
+            'doc_statut_abime_code',
+            'doc_statut_desherbe_code',
+            'doc_statut_desherbe_date',
+            'doc_statut_perdu_code',
+            'doc_statut_perdu_date',
+            'doc_usage_emprunt_date',
+            'doc_usage_date_dernier_pret',
+            'doc_biblio_id',
+            'doc_biblio_titre',
+            'doc_biblio_annee_publication',
+            'doc_biblio_support_code',
+            'doc_item_pilon_annee',
+            'doc_item_pilon_motif'
+        ]
+
+        # en sortie, on doit obtenir les champs suivants pour es :
+        self.doc_es_columns = [
+            'doc_item_id',
+            'doc_item_code_barre',
+            'doc_item_date_creation',
+            'doc_item_date_creation_annee',
+            'doc_item_prix',
+            'doc_item_site_detenteur_code',
+            'doc_item_site_detenteur',
+            'doc_item_site_rattachement_code',
+            'doc_item_site_rattachement',
+            'doc_item_localisation_code',
+            'doc_item_localisation',
+            'doc_item_site_poldoc',
+            'doc_item_collection_ccode',
+            'doc_item_collection_lib',
+            'doc_item_collection_lib1',
+            'doc_item_collection_lib2',
+            'doc_item_collection_lib3',
+            'doc_item_collection_lib4',
+            'doc_item_cote',
+            'doc_statut_code',
+            'doc_statut',
+            'doc_statut_abime_code',
+            'doc_statut_abime',
+            'doc_statut_desherbe_code',
+            'doc_statut_desherbe',
+            'doc_statut_desherbe_date',
+            'doc_statut_desherbe_annee',
+            'doc_statut_perdu_code',
+            'doc_statut_perdu',
+            'doc_statut_perdu_date',
+            'doc_statut_perdu',
+            'doc_usage_emprunt_date',
+            'doc_usage_emprunt',
+            'doc_usage_date_dernier_pret',
+            'doc_usage_date_dernier_pret_annee',
+            'doc_biblio_id',
+            'doc_biblio_titre',
+            'doc_biblio_annee_publication',
+            'doc_biblio_support_code',
+            'doc_biblio_support',
+            'doc_item_pilon_annee',
+            'doc_item_pilon_motif'
+        ]
+
+    def get_doc_statdb_data(self):
+        self.get_doc_item_id()
+        self.get_doc_item_code_barre()
+        self.get_doc_item_date_creation()
+        self.get_doc_item_prix()
+        self.get_doc_item_site_detenteur_code()
+        self.get_doc_item_site_rattachement_code()
+        self.get_doc_item_localisation_code()
+        self.get_doc_item_collection_ccode()
+        self.get_doc_item_cote()
+        self.get_doc_statut_code()
+        self.get_doc_statut_abime_code()
+        self.get_doc_statut_desherbe_code()
+        self.get_doc_statut_desherbe_date()
+        self.get_doc_statut_perdu_code()
+        self.get_doc_statut_perdu_date()
+        self.get_doc_usage_emprunt_date()
+        self.get_doc_usage_date_dernier_pret()
+        self.get_doc_biblio_id()
+        self.get_doc_biblio_titre()
+        self.get_doc_biblio_annee_publication()
+        self.get_doc_biblio_support_code()
+        self.get_doc_item_pilon_annee()
+        self.get_doc_item_pilon_motif()
+
+    def get_doc_es_data(self):
+        self.get_doc_item_date_creation_annee()
+        self.get_doc_item_site_detenteur()
+        self.get_doc_item_site_rattachement()
+        self.get_doc_item_localisation()
+        self.get_doc_item_site_poldoc()
+        self.get_doc_item_collection_lib()
+        self.get_doc_item_collection_lib1()
+        self.get_doc_item_collection_lib2()
+        self.get_doc_item_collection_lib3()
+        self.get_doc_item_collection_lib4()
+        self.get_doc_statut()
+        self.get_doc_statut_abime()
+        self.get_doc_statut_desherbe()
+        self.get_doc_statut_desherbe_annee()
+        self.get_doc_statut_perdu()
+        self.get_doc_statut_perdu_annee()
+        self.get_doc_usage_emprunt()
+        self.get_doc_usage_date_dernier_pret_annee()
+        self.get_doc_biblio_support()
+
+    def get_doc_item_id(self):
+        if 'itemnumber' in self.df and 'doc_item_id' not in self.df:
+            self.df['doc_item_id'] = self.df['itemnumber']
+
+    def get_doc_item_code_barre(self):
+        if ('barcode' in self.df
+                and 'doc_item_code_barre' not in self.df):
+            self.df['doc_item_code_barre'] = self.df['barcode']
+
+    def get_doc_item_date_creation(self):
+        if ('dateaccessioned' in self.df and
+                'doc_item_date_creation' not in self.df):
+            self.df['doc_item_date_creation'] = self.df['dateaccessioned']
+
+    def get_doc_item_date_creation_annee(self):
+        if ('doc_item_date_creation' in self.df and
+                'doc_item_date_creation_annee' not in self.df):
+            self.df['doc_item_date_creation_annee'] = self.df['doc_item_date_creation'].astype(
+                'datetime64[ns]').dt.year
+
+    def get_doc_item_prix(self):
+        if 'price' in self.df and 'doc_item_prix' not in self.df:
+            self.df['doc_item_prix'] = self.df['price']
+
+    def get_doc_item_site_detenteur_code(self):
+        if ('homebranch' in self.df and
+                'doc_item_site_detenteur_code' not in self.df):
+            self.df['doc_item_site_detenteur_code'] = self.df['homebranch']
+
+    def get_doc_item_site_detenteur(self):
+        if ('doc_item_site_detenteur_code' in self.df and
+                'doc_item_site_detenteur' not in self.df):
+            self.df['doc_item_site_detenteur'] = self.df['doc_item_site_detenteur_code'].apply(
+                lambda x: self.c2l['site'][x] if x in self.c2l['site'] else np.nan)
+
+    def get_doc_item_site_rattachement_code(self):
+        if ('holdingbranch' in self.df and
+                'doc_item_site_rattachement_code' not in self.df):
+            self.df['doc_item_site_rattachement_code'] = self.df['holdingbranch']
+
+    def get_doc_item_site_rattachement(self):
+        if ('doc_item_site_rattachement_code' in self.df and
+                'doc_item_site_rattachement' not in self.df):
+            self.df['doc_item_site_rattachement'] = self.df['doc_item_site_rattachement_code'].apply(
+                lambda x: self.c2l['site'][x] if x in self.c2l['site'] else np.nan)
+
+    def get_doc_item_localisation_code(self):
+        if ('location' in self.df and
+                'doc_item_localisation_code' not in self.df):
+            self.df['doc_item_localisation_code'] = self.df['location']
+
+    def get_doc_item_localisation(self):
+        if ('doc_item_localisation_code' in self.df and
+                'doc_item_localisation' not in self.df):
+            self.df['doc_item_localisation'] = self.df['doc_item_localisation_code'].apply(
+                lambda x: self.c2l['localisation'][x]['lib']
+                if x in self.c2l['localisation'] else np.nan)
+
+    def get_doc_item_site_poldoc(self):
+        if ('doc_item_localisation_code' in self.df and
+                'doc_item_site_poldoc' not in self.df):
+            self.df['doc_item_site_poldoc'] = 'Médiathèque'
+            self.df.loc[self.df['doc_item_localisation_code'] ==
+                        'MED0A', 'doc_item_site_poldoc'] = 'Collectivités'
+            self.df.loc[self.df['doc_item_localisation_code']
+                        == 'BUS1A', 'doc_item_site_poldoc'] = 'Zèbre'
+
+    def get_doc_item_collection_ccode(self):
+        if ('ccode' in self.df and
+                'doc_item_collection_ccode' not in self.df):
+            self.df['doc_item_collection_ccode'] = self.df['ccode']
+
+    def get_doc_item_collection_lib(self):
+        if ('doc_item_collection_ccode' in self.df and
+                'doc_item_collection_lib' not in self.df):
+            self.df['doc_item_collection_lib'] = self.df['doc_item_collection_ccode'].apply(
+                lambda x: self.c2l['ccode'][x]['lib'] if x in self.c2l['ccode'] else np.nan)
+
+    def get_doc_item_collection_lib1(self):
+        if ('doc_item_collection_ccode' in self.df and
+                'doc_item_collection_lib1' not in self.df):
+            self.df['doc_item_collection_lib1'] = self.df['doc_item_collection_ccode'].apply(
+                lambda x: self.c2l['ccode'][x]['lib1'] if x in self.c2l['ccode'] else np.nan)
+
+    def get_doc_item_collection_lib2(self):
+        if ('doc_item_collection_ccode' in self.df and
+                'doc_item_collection_lib2' not in self.df):
+            self.df['doc_item_collection_lib2'] = self.df['doc_item_collection_ccode'].apply(
+                lambda x: self.c2l['ccode'][x]['lib2'] if x in self.c2l['ccode'] else np.nan)
+
+    def get_doc_item_collection_lib3(self):
+        if ('doc_item_collection_ccode' in self.df and
+                'doc_item_collection_lib3' not in self.df):
+            self.df['doc_item_collection_lib3'] = self.df['doc_item_collection_ccode'].apply(
+                lambda x: self.c2l['ccode'][x]['lib3'] if x in self.c2l['ccode'] else np.nan)
+
+    def get_doc_item_collection_lib4(self):
+        if ('doc_item_collection_ccode' in self.df and
+                'doc_item_collection_lib4' not in self.df):
+            self.df['doc_item_collection_lib4'] = self.df['doc_item_collection_ccode'].apply(
+                lambda x: self.c2l['ccode'][x]['lib4'] if x in self.c2l['ccode'] else np.nan)
+
+    def get_doc_item_cote(self):
+        if ('itemcallnumber' in self.df and
+                'doc_item_cote' not in self.df):
+            self.df['doc_item_cote'] = self.df['itemcallnumber']
+
+    def get_doc_statut_code(self):
+        if ('notforloan' in self.df and
+                'doc_statut_code' not in self.df):
+            self.df['doc_statut_code'] = self.df['notforloan']
+
+    def get_doc_statut(self):
+        if ('doc_statut_code' in self.df and
+                'doc_statut' not in self.df):
+            self.df['doc_statut'] = self.df['doc_statut_code'].astype('str').apply(
+                lambda x: self.c2l['doc_statut'][x]['lib']
+                if x in self.c2l['doc_statut'] else np.nan)
+
+    def get_doc_statut_abime_code(self):
+        if ('damaged' in self.df and
+                'doc_statut_abime_code' not in self.df):
+            self.df['doc_statut_abime_code'] = self.df['damaged']
+
+    def get_doc_statut_abime(self):
+        if ('doc_statut_abime_code' in self.df and
+                'doc_statut_abime' not in self.df):
+            self.df['doc_statut_abime'] = self.df['doc_statut_abime_code'].astype('str').apply(
+                lambda x: self.c2l['doc_statut_abime'][x]['lib']
+                if x in self.c2l['doc_statut_abime'] else np.nan)
+
+    def get_doc_statut_desherbe_code(self):
+        if ('withdrawn' in self.df and
+                'doc_statut_desherbe_code' not in self.df):
+            self.df['doc_statut_desherbe_code'] = self.df['withdrawn']
+
+    def get_doc_statut_desherbe(self):
+        if ('doc_statut_desherbe_code' in self.df and
+                'doc_statut_desherbe' not in self.df):
+            self.df['doc_statut_desherbe'] = self.df['doc_statut_desherbe_code'].astype('str').apply(
+                lambda x: self.c2l['doc_statut_desherbe'][x]['lib']
+                if x in self.c2l['doc_statut_desherbe'] else np.nan)
+
+    def get_doc_statut_desherbe_date(self):
+        if ('withdrawn_on' in self.df and
+                'doc_statut_desherbe_date' not in self.df):
+            self.df['doc_statut_desherbe_date'] = self.df['withdrawn_on']
+
+    def get_doc_statut_desherbe_annee(self):
+        if ('doc_statut_desherbe_date' in self.df and
+                'doc_statut_desherbe_annee' not in self.df):
+            self.df['doc_statut_desherbe_annee'] = self.df['doc_statut_desherbe_date'].astype(
+                'datetime64[ns]').dt.year
+
+    def get_doc_statut_perdu_code(self):
+        if ('itemlost' in self.df and
+                'doc_statut_perdu_code' not in self.df):
+            self.df['doc_statut_perdu_code'] = self.df['itemlost']
+
+    def get_doc_statut_perdu(self):
+        if ('doc_statut_perdu_code' in self.df and
+                'doc_statut_perdu' not in self.df):
+            self.df['doc_statut_perdu'] = self.df['doc_statut_perdu_code'].astype('str').apply(
+                lambda x: self.c2l['doc_statut_perdu'][x]['lib']
+                if x in self.c2l['doc_statut_perdu'] else np.nan)
+
+    def get_doc_statut_perdu_date(self):
+        if ('itemlost_on' in self.df and
+                'doc_statut_perdu_date' not in self.df):
+            self.df['doc_statut_perdu_date'] = self.df['itemlost_on']
+
+    def get_doc_statut_perdu_annee(self):
+        if ('doc_statut_perdu_date' in self.df and
+                'doc_statut_perdu_annee' not in self.df):
+            self.df['doc_statut_perdu_annee'] = self.df['doc_statut_perdu_date'].astype(
+                'datetime64[ns]').dt.year
+
+    def get_doc_usage_emprunt_date(self):
+        if ('onloan' in self.df and
+                'doc_usage_emprunt_date' not in self.df):
+            self.df['doc_usage_emprunt_date'] = self.df['onloan']
+
+    def get_doc_usage_emprunt(self):
+        if ('doc_usage_emprunt_date' in self.df and
+                'doc_usage_emprunt' not in self.df):
+            self.df['doc_usage_emprunt'] = 'non'
+            self.df.loc[self.df['doc_usage_emprunt_date'].astype(
+                'str').str.startswith('2'), 'doc_usage_emprunt'] = 'emprunté'
+
+    def get_doc_usage_date_dernier_pret(self):
+        if ('datelastborrowed' in self.df and
+                'doc_usage_date_dernier_pret' not in self.df):
+            self.df['doc_usage_date_dernier_pret'] = self.df['datelastborrowed']
+
+    def get_doc_usage_date_dernier_pret_annee(self):
+        if ('doc_usage_date_dernier_pret' in self.df and
+                'doc_usage_date_dernier_pret_annee' not in self.df):
+            self.df['doc_usage_date_dernier_pret_annee'] = self.df['doc_usage_date_dernier_pret'].astype(
+                'datetime64[ns]').dt.year
+
+    def get_doc_biblio_id(self):
+        if ('biblionumber' in self.df and
+                'doc_biblio_id' not in self.df):
+            self.df['doc_biblio_id'] = self.df['biblionumber']
+
+    def get_doc_biblio_titre(self):
+        if ('titre' in self.df and
+                'doc_biblio_titre' not in self.df):
+            self.df['doc_biblio_titre'] = self.df['titre']
+        if 'doc_biblio_titre' in self.df:
+            self.df['doc_biblio_titre'] = self.df['doc_biblio_titre'].astype('str').apply(
+                lambda x: unidecode(x))
+
+
+    def get_doc_biblio_annee_publication(self):
+        if ('publicationyear' in self.df and
+                'doc_biblio_annee_publication' not in self.df):
+            self.df['publicationyear'] = self.df['publicationyear'].astype('str')
+            self.df['doc_biblio_annee_publication'] = self.df['publicationyear'].str.extract(r'(^\d{4}$)')
+
+    def get_doc_biblio_support_code(self):
+        if ('itemtype' in self.df and
+                'doc_biblio_support_code' not in self.df):
+            self.df['doc_biblio_support_code'] = self.df['itemtype']
+
+    def get_doc_biblio_support(self):
+        if ('doc_biblio_support_code' in self.df and
+                'doc_biblio_support' not in self.df):
+            self.df['doc_biblio_support'] = self.df['doc_biblio_support_code'].astype('str').apply(
+                lambda x: self.c2l['doc_biblio_support'][x]['lib']
+                if x in self.c2l['doc_biblio_support'] else np.nan)
+
+    def get_doc_item_pilon_annee(self):
+        if ('annee_mise_pilon' in self.df and
+                'doc_item_pilon_annee' not in self.df):
+            self.df['doc_item_pilon_annee'] = self.df['annee_mise_pilon']
+
+    def get_doc_item_pilon_motif(self):
+        if ('motif' in self.df and
+                'doc_item_pilon_motif' not in self.df):
+            self.df['doc_item_pilon_motif'] = self.df['motif']
