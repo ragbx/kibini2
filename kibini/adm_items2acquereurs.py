@@ -36,4 +36,4 @@ LIMIT 100
 
 df = pd.read_sql(query, con=db_conn)
 document = Document(df=df, con=db_conn, c2l=c2l.dict_codes_lib)
-print(len(document.df))
+print(document.df)
