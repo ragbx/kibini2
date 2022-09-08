@@ -5,5 +5,5 @@ database:
     pwd: toto
 elasticsearch:
     node: http://localhost:9200
-dir_log: toto
-dir_data: toto
+dir_log:
+    toto
