@@ -62,7 +62,7 @@ FROM koha_prod.reserves
 WHERE waitingdate IS NULL
 """
 resa = pd.read_sql(query, con=db_conn)
-df = df.merge(resa, how='left', left_on='dic_biblio_id', right_on='biblionumber')
+df = df.merge(resa, how='left', left_on='doc_biblio_id', right_on='biblionumber')
 
 r = len(df)
 if r > 0:
