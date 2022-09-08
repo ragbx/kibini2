@@ -452,7 +452,7 @@ class Document():
                     'doc_statut_perdu',
                     'doc_statut_perdu_date',
                     'doc_usage_date_dernier_pret',
-                    'doc_biblio_auteur'
+                    'doc_biblio_auteur',
                     'doc_biblio_titre',
                     'doc_biblio_volume',
                     'doc_biblio_annee_publication',
