@@ -4,6 +4,7 @@ from os.path import join
 from kiblib.utils.db import DbConn
 from kiblib.utils.conf import Config
 from kiblib.utils.email_sender import send_email
+from kiblib.document import Document
 
 db_conn = DbConn().create_engine()
 
@@ -27,8 +28,9 @@ WHERE i.notforloan = 4
 AND i.itemlost != 0
 AND DATE(i.timestamp) >= CURDATE() - INTERVAL 6 MONTH
 ORDER BY i.location, i.itemcallnumber
+LIMIY 100
 """
 
 df = pd.read_sql(query, con=db_conn)
-r = len(df)
-print(r)
+document = Document(df=df, con=db_conn, c2l=c2l.dict_codes_lib)
+print(len(document.df))
