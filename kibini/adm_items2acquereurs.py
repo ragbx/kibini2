@@ -57,15 +57,29 @@ df = document.doc_list_data
 
 query = """
 SELECT
-    biblionumber, "oui"
+    biblionumber, "oui" as "réservation"
 FROM koha_prod.reserves
 WHERE waitingdate IS NULL
 """
 resa = pd.read_sql(query, con=db_conn)
 df = df.merge(resa, how='left', left_on='doc_biblio_id', right_on='biblionumber')
+df = df.drop(columns=['biblionumber'])
 
 r = len(df)
 if r > 0:
     dir_data = Config().get_config_data()
     file_out = join(dir_data, "sortisCollectionsPerdus.xlsx")
     df.to_excel(file_out, header=True, index=False)
+
+    subject = "[Kibini] TEST TEST Documents sortis des collections (perdus, non restitués)"
+    fromaddr = 'PICHENOT François <fpichenot@ville-roubaix.fr>'
+    to = ', '.join(['PICHENOT François <fpichenot@ville-roubaix.fr>'])
+    #acquereurs = Config().get_config_acquereurs()
+    #courriels = [f"{acquereur['courriel']}@ville-roubaix.fr" for acquereur in acquereurs]
+    #to = ', '.join(courriels)
+
+    content = f"""\
+        TEST TEST Documents sortis des collections au cours des 30 derniers jours car perdus ou non restitués.
+        {r} documents concernés.
+    """
+    send_email(fromaddr, to, subject, content, file_out)
