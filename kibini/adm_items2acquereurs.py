@@ -78,7 +78,7 @@ if r > 0:
     #to = ', '.join(courriels)
 
     content = f"""\
-        TEST TEST Documents sortis des collections au cours des 30 derniers jours car perdus ou non restitués.
+        TEST TEST Documents perdus ou prétendus rendus depuis plus de 9 semaines.
         {r} documents concernés.
     """
     send_email(fromaddr, to, subject, content, file_out)
