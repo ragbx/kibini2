@@ -28,7 +28,7 @@ WHERE i.notforloan = 4
 AND i.itemlost != 0
 AND DATE(i.timestamp) >= CURDATE() - INTERVAL 6 MONTH
 ORDER BY i.location, i.itemcallnumber
-LIMIY 100
+LIMIT 100
 """
 
 df = pd.read_sql(query, con=db_conn)
