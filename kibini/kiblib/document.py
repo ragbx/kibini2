@@ -46,9 +46,9 @@ class Document():
                     b.title as titre,
                     bi.publicationyear,
                     bi.itemtype
-                FROM koha2019.items i
-                JOIN koha2019.biblioitems bi ON i.biblionumber = bi.biblionumber
-                JOIN koha2019.biblio b ON i.biblionumber = b.biblionumber
+                FROM koha_prod.items i
+                JOIN koha_prod.biblioitems bi ON i.biblionumber = bi.biblionumber
+                JOIN koha_prod.biblio b ON i.biblionumber = b.biblionumber
                 LIMIT 10000
             """
             self.df = pd.read_sql(query, con=self.db_conn)
@@ -120,6 +120,7 @@ class Document():
             'doc_usage_date_dernier_pret',
             'doc_usage_date_dernier_pret_annee',
             'doc_biblio_id',
+            'doc_biblio_auteur'
             'doc_biblio_titre',
             'doc_biblio_annee_publication',
             'doc_biblio_support_code',
@@ -147,7 +148,9 @@ class Document():
         self.get_doc_usage_emprunt_date()
         self.get_doc_usage_date_dernier_pret()
         self.get_doc_biblio_id()
+        self.get_doc_biblio_auteur()
         self.get_doc_biblio_titre()
+        self.get_doc_biblio_volume()
         self.get_doc_biblio_annee_publication()
         self.get_doc_biblio_support_code()
         self.get_doc_item_pilon_annee()
@@ -379,6 +382,11 @@ class Document():
                 'doc_biblio_id' not in self.df):
             self.df['doc_biblio_id'] = self.df['biblionumber']
 
+    def get_doc_biblio_auteur(self):
+            if ('author' in self.df and
+                    'doc_biblio_auteur' not in self.df):
+                self.df['doc_biblio_auteur'] = self.df['author']
+
     def get_doc_biblio_titre(self):
         if ('titre' in self.df and
                 'doc_biblio_titre' not in self.df):
@@ -387,6 +395,13 @@ class Document():
             self.df['doc_biblio_titre'] = self.df['doc_biblio_titre'].astype('str').apply(
                 lambda x: unidecode(x))
 
+    def get_doc_biblio_volume():
+        if ('volume' in self.df and
+                'doc_biblio_volume' not in self.df):
+            self.df['doc_biblio_volume'] = self.df['volume']
+        if ('volume_perio' in self.df and
+                'doc_biblio_volume' not in self.df):
+            self.df['doc_biblio_volume'] = self.df['volume_perio']
 
     def get_doc_biblio_annee_publication(self):
         if ('publicationyear' in self.df and

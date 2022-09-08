@@ -33,8 +33,8 @@ SELECT
     i.biblionumber,
     b.title as titre,
     b.author,
-    ExtractValue(m.metadata, '//datafield[@tag="200"]/subfield[@code="h"]') AS "Volume",
-    i.copynumber AS "Volume perios",
+    ExtractValue(m.metadata, '//datafield[@tag="200"]/subfield[@code="h"]') AS "volume",
+    i.copynumber AS "volume_perio",
     bi.publicationyear,
     bi.itemtype,
     DATE(i.timestamp)
