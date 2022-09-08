@@ -433,3 +433,29 @@ class Document():
         if ('motif' in self.df and
                 'doc_item_pilon_motif' not in self.df):
             self.df['doc_item_pilon_motif'] = self.df['motif']
+
+    def get_doc_list_data(self):
+        columns_to_keep = [
+                    'doc_item_code_barre',
+                    'doc_item_date_creation',
+                    'doc_item_prix',
+                    'doc_item_site_detenteur',
+                    'doc_item_site_rattachement',
+                    'doc_item_localisation',
+                    'doc_item_site_poldoc',
+                    'doc_item_collection_lib',
+                    'doc_item_cote',
+                    'doc_statut',
+                    'doc_statut_abime',
+                    'doc_statut_desherbe',
+                    'doc_statut_desherbe_date',
+                    'doc_statut_perdu',
+                    'doc_statut_perdu_date',
+                    'doc_usage_date_dernier_pret',
+                    'doc_biblio_auteur'
+                    'doc_biblio_titre',
+                    'doc_biblio_volume',
+                    'doc_biblio_annee_publication',
+                    'doc_biblio_support'
+                ]
+        self.doc_list_data = self.df[columns_to_keep]
