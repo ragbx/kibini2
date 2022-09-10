@@ -36,10 +36,11 @@ class Document():
                     i.itemcallnumber,
                     i.notforloan,
                     i.damaged,
+					DATE(i.damaged_on),
                     i.withdrawn,
-                    i.withdrawn_on,
+                    DATE(i.withdrawn_on),
                     i.itemlost,
-                    i.itemlost_on,
+                    DATE(i.itemlost_on),
                     i.onloan,
                     i.datelastborrowed,
                     i.biblionumber,
@@ -68,6 +69,7 @@ class Document():
             'doc_item_cote',
             'doc_statut_code',
             'doc_statut_abime_code',
+            'doc_statut_abime_date',
             'doc_statut_desherbe_code',
             'doc_statut_desherbe_date',
             'doc_statut_perdu_code',
@@ -109,6 +111,7 @@ class Document():
             'doc_statut',
             'doc_statut_abime_code',
             'doc_statut_abime',
+            'doc_statut_abime_date',
             'doc_statut_desherbe_code',
             'doc_statut_desherbe',
             'doc_statut_desherbe_date',
@@ -144,6 +147,7 @@ class Document():
         self.get_doc_item_cote()
         self.get_doc_statut_code()
         self.get_doc_statut_abime_code()
+        self.get_doc_statut_abime_date()
         self.get_doc_statut_desherbe_code()
         self.get_doc_statut_desherbe_date()
         self.get_doc_statut_perdu_code()
@@ -172,6 +176,7 @@ class Document():
         self.get_doc_item_collection_lib4()
         self.get_doc_statut()
         self.get_doc_statut_abime()
+        self.get_doc_statut_abime_annee()
         self.get_doc_statut_desherbe()
         self.get_doc_statut_desherbe_annee()
         self.get_doc_statut_perdu()
@@ -311,6 +316,17 @@ class Document():
                 lambda x: self.c2l['doc_statut_abime'][x]['lib']
                 if x in self.c2l['doc_statut_abime'] else np.nan)
 
+    def get_doc_statut_abime_date(self):
+        if ('damaged_on' in self.df and
+                'doc_statut_abime_date' not in self.df):
+            self.df['doc_statut_abime_date'] = self.df['damaged_on']
+
+    def get_doc_statut_abime_annee(self):
+        if ('doc_statut_abime_date' in self.df and
+                'doc_statut_abime_annee' not in self.df):
+            self.df['doc_statut_abime_annee'] = self.df['doc_statut_abime_date'].astype(
+                'datetime64[ns]').dt.year
+
     def get_doc_statut_desherbe_code(self):
         if ('withdrawn' in self.df and
                 'doc_statut_desherbe_code' not in self.df):
@@ -447,6 +463,7 @@ class Document():
                     'doc_item_cote',
                     'doc_statut',
                     'doc_statut_abime',
+                    'doc_statut_abime_date',
                     'doc_statut_desherbe',
                     'doc_statut_desherbe_date',
                     'doc_statut_perdu',

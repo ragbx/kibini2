@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from os.path import join
 
 from kiblib.utils.db import DbConn
@@ -24,6 +25,7 @@ SELECT
     i.itemcallnumber,
     i.notforloan,
     i.damaged,
+    i.damaged_on,
     i.withdrawn,
     i.withdrawn_on,
     i.itemlost,
@@ -63,6 +65,36 @@ WHERE waitingdate IS NULL
 resa = pd.read_sql(query, con=db_conn)
 df = df.merge(resa, how='left', left_on='doc_biblio_id', right_on='biblionumber')
 df = df.drop(columns=['biblionumber'])
+df.loc[df['doc_item_localisation'] == 'Magasin collectivités', 'réservation'] = np.nan
+
+
+
+df = df.rename(columns={
+	"doc_item_code_barre": "code-barres",
+	"doc_item_date_creation": "création",
+	"doc_item_prix": "prix",
+	"doc_item_site_detenteur": "site actuel",
+	"doc_item_site_rattachement": "site de rattachement",
+	"doc_item_localisation": "localisation",
+	"doc_item_site_poldoc": "site poldoc",
+	"doc_item_collection_lib": "collection",
+	"doc_item_cote": "cote",
+	"doc_statut": "statut",
+	"doc_statut_abime": "abîmé ?",
+	"doc_statut_abime_date": "date abîmé",
+	"doc_statut_desherbe": "désherbé ?",
+	"doc_statut_desherbe_date": "date désherbé",
+	"doc_statut_perdu": "perdu ?",
+	"doc_statut_perdu_date": "date perdu",
+	"doc_usage_date_dernier_pret": "dernier prêt",
+	"doc_biblio_id": "biblionumber",
+	"doc_biblio_auteur": "auteur",
+	"doc_biblio_titre": "titre",
+	"doc_biblio_volume": "volume",
+	"doc_biblio_annee_publication": "année",
+	"doc_biblio_support": "support",
+	"réservation": "réservation"
+})
 
 r = len(df)
 if r > 0:

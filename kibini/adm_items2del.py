@@ -26,6 +26,6 @@ if r > 0:
     content = f"""\
         Exemplaires à supprimer.
         Sortis des collections depuis plus d'un mois. Pas abîmés. Pas perdus ni non restitués.
-                {r} documents sont concernés.
+        {r} documents sont concernés.
         """
     send_email(fromaddr, to, subject, content, file_out)
