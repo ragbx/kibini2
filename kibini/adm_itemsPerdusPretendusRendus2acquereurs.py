@@ -44,8 +44,9 @@ FROM koha_prod.items i
 JOIN koha_prod.biblioitems bi ON i.biblionumber = bi.biblionumber
 JOIN koha_prod.biblio b ON i.biblionumber = b.biblionumber
 JOIN koha_prod.biblio_metadata m ON m.biblionumber = bi.biblionumber
-WHERE i.notforloan = 0
-    AND ((i.itemlost = 2 AND YEARWEEK(i.itemlost_on) < YEARWEEK(CURDATE() - INTERVAL 9 WEEK)) OR (i.damaged = 2 AND YEARWEEK(damaged_on) < YEARWEEK(CURDATE() - INTERVAL 9 WEEK)))
+WHERE i.notforloan = 4
+    AND (i.itemlost != 0 OR i.damaged = 2)
+	AND DATE(i.timestamp) >= CURDATE() - INTERVAL 1 MONTH
 ORDER BY i.location, i.itemcallnumber
 """
 
@@ -110,7 +111,7 @@ if r > 0:
     #to = ', '.join(courriels)
 
     content = f"""\
-        TEST TEST Documents perdus ou prétendus rendus depuis plus de 9 semaines.
+        Documents perdus ou non restitués au cours du mois précédent.
         {r} documents concernés.
     """
     send_email(fromaddr, to, subject, content, file_out)
