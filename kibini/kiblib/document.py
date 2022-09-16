@@ -36,7 +36,7 @@ class Document():
                     i.itemcallnumber,
                     i.notforloan,
                     i.damaged,
-					DATE(i.damaged_on),
+                    DATE(i.damaged_on),
                     i.withdrawn,
                     DATE(i.withdrawn_on),
                     i.itemlost,
@@ -46,7 +46,8 @@ class Document():
                     i.biblionumber,
                     b.title as titre,
                     bi.publicationyear,
-                    bi.itemtype
+                    bi.itemtype,
+                    i.timestamp
                 FROM koha_prod.items i
                 JOIN koha_prod.biblioitems bi ON i.biblionumber = bi.biblionumber
                 JOIN koha_prod.biblio b ON i.biblionumber = b.biblionumber
@@ -83,7 +84,8 @@ class Document():
             'doc_biblio_annee_publication',
             'doc_biblio_support_code',
             'doc_item_pilon_annee',
-            'doc_item_pilon_motif'
+            'doc_item_pilon_motif',
+            'doc_item_date_modif'
         ]
 
         # en sortie, on doit obtenir les champs suivants pour es :
@@ -132,7 +134,8 @@ class Document():
             'doc_biblio_support_code',
             'doc_biblio_support',
             'doc_item_pilon_annee',
-            'doc_item_pilon_motif'
+            'doc_item_pilon_motif',
+            'doc_item_date_modif'
         ]
 
     def get_doc_statdb_data(self):
@@ -162,6 +165,7 @@ class Document():
         self.get_doc_biblio_support_code()
         self.get_doc_item_pilon_annee()
         self.get_doc_item_pilon_motif()
+        self.get_doc_item_date_modif()
 
     def get_doc_es_data(self):
         self.get_doc_item_date_creation_annee()
@@ -449,6 +453,11 @@ class Document():
         if ('motif' in self.df and
                 'doc_item_pilon_motif' not in self.df):
             self.df['doc_item_pilon_motif'] = self.df['motif']
+            
+    def get_doc_item_date_modif(self):
+        if ('timestamp' in self.df and
+                'doc_item_date_modif' not in self.df):
+            self.df['doc_item_date_modif'] = self.df['timestamp']
 
     def get_doc_list_data(self):
         columns_to_keep = [
@@ -458,7 +467,6 @@ class Document():
                     'doc_item_site_detenteur',
                     'doc_item_site_rattachement',
                     'doc_item_localisation',
-                    'doc_item_site_poldoc',
                     'doc_item_collection_lib',
                     'doc_item_cote',
                     'doc_statut',
@@ -474,6 +482,7 @@ class Document():
                     'doc_biblio_titre',
                     'doc_biblio_volume',
                     'doc_biblio_annee_publication',
-                    'doc_biblio_support'
+                    'doc_biblio_support',
+                    'doc_item_date_modif'
                 ]
         self.doc_list_data = self.df[columns_to_keep]

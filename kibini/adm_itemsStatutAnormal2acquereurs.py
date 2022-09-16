@@ -44,9 +44,8 @@ FROM koha_prod.items i
 JOIN koha_prod.biblioitems bi ON i.biblionumber = bi.biblionumber
 JOIN koha_prod.biblio b ON i.biblionumber = b.biblionumber
 JOIN koha_prod.biblio_metadata m ON m.biblionumber = bi.biblionumber
-WHERE i.notforloan = 4
-    AND (i.itemlost != 0 OR i.damaged = 2)
-	AND DATE(i.timestamp) >= CURDATE() - INTERVAL 1 MONTH
+WHERE i.notforloan IN ('-1', '-2', '-3', '-4', '5')
+	AND DATE(i.timestamp) <= CURDATE() - INTERVAL 1 YEAR
 ORDER BY i.location, i.itemcallnumber
 """
 
@@ -67,6 +66,7 @@ resa = pd.read_sql(query, con=db_conn)
 df = df.merge(resa, how='left', left_on='doc_biblio_id', right_on='biblionumber')
 df = df.drop(columns=['biblionumber'])
 df.loc[df['doc_item_localisation'] == 'Magasin collectivités', 'réservation'] = np.nan
+df = df.sort_values(by=['doc_item_localisation', 'doc_item_collection_lib', 'doc_statut', 'doc_item_date_modif'])
 
 
 
@@ -93,16 +93,17 @@ df = df.rename(columns={
 	"doc_biblio_volume": "volume",
 	"doc_biblio_annee_publication": "année",
 	"doc_biblio_support": "support",
-	"réservation": "réservation"
+	"réservation": "réservation",
+	"doc_item_date_modif": "date dernière modification"
 })
 
 r = len(df)
 if r > 0:
     dir_data = Config().get_config_data()
-    file_out = join(dir_data, "sortisCollectionsPerdus.xlsx")
+    file_out = join(dir_data, "statutAnormal.xlsx")
     df.to_excel(file_out, header=True, index=False)
 
-    subject = "[Kibini] Documents sortis des collections (perdus, non restitués, prétendus rendus)"
+    subject = "[Kibini] Documents dont le statut paraît anormal"
     fromaddr = 'PICHENOT François <fpichenot@ville-roubaix.fr>'
     to = ', '.join(['PICHENOT François <fpichenot@ville-roubaix.fr>'])
     #acquereurs = Config().get_config_acquereurs()
@@ -110,7 +111,7 @@ if r > 0:
     #to = ', '.join(courriels)
 
     content = f"""\
-        Documents perdus ou non restitués au cours du mois précédent.
+        Documents depuis plus d'un an dans un statut particulier (commande, traitement, réparation, ...).
         {r} documents concernés.
     """
     send_email(fromaddr, to, subject, content, file_out)
