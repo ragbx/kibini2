@@ -31,10 +31,11 @@ if r > 0:
     subject = "[Kibini] Vendangeur : autorités à dédoublonner"
     fromaddr = 'PICHENOT François <fpichenot@ville-roubaix.fr>'
     to = ', '.join(['PICHENOT François <fpichenot@ville-roubaix.fr>'])
+    arks_to_print = "\n".join(arks_to_dedupl)
     content = f"""
-        Autorités à dédoublonner.
-        {r} autorités sont concernées.
+    Autorités à dédoublonner.
+    {r} autorités sont concernées.
         
-        {'n'.join(arks_to_dedupl)}
-        """
+    {arks_to_print}
+    """
     send_email(fromaddr, to, subject, content)
