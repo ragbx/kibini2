@@ -47,4 +47,4 @@ if r > 0:
         Documents sortis des collections au cours des 30 derniers jours car perdus ou non restitués.
         {r} documents concernés.
         """
-    send_email(fromaddr, to, subject, content, file_out)
+    send_email(fromaddr, to, subject, content, file=file_out)

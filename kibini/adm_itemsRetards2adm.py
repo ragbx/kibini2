@@ -30,4 +30,4 @@ if r > 0:
         Documents en retard depuis plus de 180 jours, à sortir des collections.
                 {r} documents concernés.
         """
-    send_email(fromaddr, to, subject, content, file_out)
+    send_email(fromaddr, to, subject, content, file=file_out)

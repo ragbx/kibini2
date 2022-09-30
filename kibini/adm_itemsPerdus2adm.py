@@ -29,4 +29,4 @@ if r > 0:
         Documents passés en perdu ou prétendus rendus depuis plus de 9 semaines.
         {r} documents sont concernés.
         """
-    send_email(fromaddr, to, subject, content, file_out)
+    send_email(fromaddr, to, subject, content, file=file_out)

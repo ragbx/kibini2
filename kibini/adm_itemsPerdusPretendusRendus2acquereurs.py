@@ -113,4 +113,4 @@ if r > 0:
         Documents perdus ou non restitués au cours du mois précédent.
         {r} documents concernés.
     """
-    send_email(fromaddr, to, subject, content, file_out)
+    send_email(fromaddr, to, subject, content, file=file_out)

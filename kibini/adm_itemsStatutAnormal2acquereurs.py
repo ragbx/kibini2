@@ -114,4 +114,4 @@ if r > 0:
         Documents depuis plus d'un an dans un statut particulier (commande, traitement, réparation, ...).
         {r} documents concernés.
     """
-    send_email(fromaddr, to, subject, content, file_out)
+    send_email(fromaddr, to, subject, content, file=file_out)

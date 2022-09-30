@@ -30,4 +30,4 @@ if r > 0:
         Documents passés prétendus rendus depuis plus de 3 semaines.
         {r} documents sont concernés.
         """
-    send_email(fromaddr, to, subject, content, file_out)
+    send_email(fromaddr, to, subject, content, file=file_out)

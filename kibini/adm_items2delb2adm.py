@@ -29,4 +29,4 @@ if r > 0:
         Sortis des collections depuis plus de 6 mois, incluant les abîmés, non restitués (plus en prêt) et perdus.
                 {r} documents sont concernés.
         """
-    send_email(fromaddr, to, subject, content, file_out)
+    send_email(fromaddr, to, subject, content, file=file_out)
