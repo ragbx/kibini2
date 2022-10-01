@@ -24,6 +24,9 @@ class Config():
     def get_config_data(self):
         return self.dataconfig['dir_data']
         
+    def get_config_webdav(self):
+        return self.dataconfig['dir_webdav']
+        
     def get_config_smtp(self):
         return self.dataconfig['smtp']
         
