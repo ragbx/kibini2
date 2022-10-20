@@ -170,11 +170,10 @@ dependencies:
   - zipp=3.7.0=pyhd3eb1b0_0
   - zlib=1.2.11=h7f8727e_4
   - zstd=1.4.9=haebb681_0
-  - pip:
-    - elasticsearch5==5.5.6
-    - mysql-connector-python==8.0.22
-    - mysqlclient==2.0.1
-    - protobuf==3.14.0
-    - python-utils==2.4.0
-    - xlsxwriter==3.0.2
-prefix: /home/kibini/miniconda3/envs/kibini
+    #  - pip:
+    #- elasticsearch5
+    #- mysql-connector-python
+    #- mysqlclient
+    #- protobuf
+    #- python-utils
+    #- xlsxwriter
