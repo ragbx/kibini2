@@ -11,11 +11,12 @@ query = """
 SELECT i.itemnumber
 FROM koha_prod.items i
 JOIN koha_prod.issues iss ON iss.itemnumber = i.itemnumber
-WHERE i.itemlost != 3 AND iss.date_due < CURDATE() - INTERVAL 90 DAY
+WHERE i.itemlost != 3 AND iss.date_due < CURDATE() - INTERVAL 90 DAY AND i.location != 'MED0A'
 """
 
 df = pd.read_sql(query, con=db_conn)
 r = len(df)
+print(r)
 if r > 0:
     dir_data = Config().get_config_data()
     file_out = join(dir_data, "items_nonRestituesPlus.csv")
